@@ -10,11 +10,11 @@ data_files = args.data_files.split(',')
 
 bones = []
 for data_file in data_files:
-	with open(data_file) as f:
-		content = f.readlines()
-	records = [ele.split(' ')[1:] for ele in content]
-	records = [np.asarray([float(e) for e in ele]) for ele in records]
-	bones.extend(records)
+    with open(data_file) as f:
+        content = f.readlines()
+    records = [ele.split(' ')[1:] for ele in content]
+    records = [np.asarray([float(e) for e in ele]) for ele in records]
+    bones.extend(records)
 
 bones = np.asarray(bones)
 anchor_bone = np.mean(bones, axis=0)
