@@ -3,3 +3,4 @@
 *.npy
 .ipynb_checkpoints
 train_log
+doodles
