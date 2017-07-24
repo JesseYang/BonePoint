@@ -54,7 +54,8 @@ class Data(RNGDataFlow):
             img = cv2.imread(img_path, cv2.IMREAD_COLOR)
             bone = dp[1:]
             bone = np.asarray([float(ele) for ele in bone])
-            bone = bone - cfg.anchor_bones
+            if cfg.anchor_bones != None:
+                bone = bone - cfg.anchor_bones
             yield [img, bone]
 
 

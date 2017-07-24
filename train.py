@@ -15,8 +15,6 @@ from reader import *
 from cfgs.config import cfg
 
 TOTAL_BATCH_SIZE = 8
-INPUT_SHAPE = 224
-
 
 class Model(ModelDesc):
     def __init__(self, depth):
@@ -24,7 +22,7 @@ class Model(ModelDesc):
         self.depth = depth
 
     def _get_inputs(self):
-        return [InputDesc(tf.uint8, [None, INPUT_SHAPE, INPUT_SHAPE, 3], 'input'),
+        return [InputDesc(tf.uint8, [None, cfg.img_h, cfg.img_w, 3], 'input'),
                 InputDesc(tf.float32, [None, cfg.bone_num * 2], 'label')]
 
     def _build_graph(self, inputs):
