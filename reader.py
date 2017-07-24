@@ -51,7 +51,8 @@ class Data(RNGDataFlow):
         for k in idxs:
             dp = self.dp_list[k]
             img_path = dp[0]
-            img = cv2.imread(img_path, cv2.IMREAD_COLOR)
+            img = cv2.imread(img_path)
+            img = cv2.resize(img, (cfg.img_h, cfg.img_w))
             bone = dp[1:]
             bone = np.asarray([float(ele) for ele in bone])
             if cfg.anchor_bones != None:
@@ -60,4 +61,6 @@ class Data(RNGDataFlow):
 
 
 if __name__ == '__main__':
-    ds = Data('sealion', 'train')
+    ds = Data('train')
+    import pdb
+    pdb.set_trace()

@@ -14,8 +14,6 @@ from tensorpack.tfutils.summary import *
 from reader import *
 from cfgs.config import cfg
 
-TOTAL_BATCH_SIZE = 8
-
 class Model(ModelDesc):
     def __init__(self, depth):
         super(Model, self).__init__()
@@ -109,10 +107,13 @@ class Model(ModelDesc):
         loss = tf.square(tf.subtract(logits, label))
         loss = tf.reduce_mean(tf.reduce_sum(loss, 1), name='loss')
 
-        wd_cost = regularize_cost('.*/W', l2_regularizer(1e-4), name='l2_regularize_loss')
-        add_moving_summary(loss, wd_cost)
-        self.cost = tf.add_n([loss, wd_cost], name='cost')
-        # self.cost = tf.identity(loss, name='cost')
+        if cfg.weight_decay > 0:
+            wd_cost = regularize_cost('.*/W', l2_regularizer(cfg.weight_decay), name='l2_regularize_loss')
+            add_moving_summary(loss, wd_cost)
+            self.cost = tf.add_n([loss, wd_cost], name='cost')
+        else:
+            add_moving_summary(loss)
+            self.cost = tf.identity(loss, name='cost')
 
     def _get_optimizer(self):
         lr = get_scalar_var('learning_rate', 0.1, summary=True)
@@ -120,7 +121,6 @@ class Model(ModelDesc):
 
 
 def get_data(train_or_test):
-    # return FakeData([[64, 224,224,3],[64]], 1000, random=False, dtype='uint8')
     isTrain = train_or_test == 'train'
 
     if isTrain:
@@ -169,7 +169,7 @@ def get_config(depth):
             #     ClassificationError('wrong-top1', 'val-error-top1'),
             #     ClassificationError('wrong-top5', 'val-error-top5')]),
             ScheduledHyperParamSetter('learning_rate',
-                                      [(0, 1e-2), (30, 1e-2)]),
+                                      [(0, 1e-3), (100, 1e-4)]),
             HumanHyperParamSetter('learning_rate'),
         ],
         model=Model(depth),
@@ -181,6 +181,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', help='comma separated list of GPU(s) to use.', default='0')
     parser.add_argument('--load', help='load model', default='ImageNet-ResNet18.npy')
+    parser.add_argument('--batch_size', help='number of samples in a batch', required=True)
     parser.add_argument('-d', '--depth', help='resnet depth',
                         type=int, default=18, choices=[18, 34, 50, 101])
     args = parser.parse_args()
@@ -190,7 +191,7 @@ if __name__ == '__main__':
 
     assert args.gpu is not None, "Need to specify a list of gpu for training!"
     NR_GPU = len(args.gpu.split(','))
-    BATCH_SIZE = TOTAL_BATCH_SIZE // NR_GPU
+    BATCH_SIZE = int(args.batch_size) // NR_GPU
 
     logger.auto_set_dir()
     config = get_config(args.depth)
