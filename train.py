@@ -169,11 +169,12 @@ def get_config(depth):
             #     ClassificationError('wrong-top1', 'val-error-top1'),
             #     ClassificationError('wrong-top5', 'val-error-top5')]),
             ScheduledHyperParamSetter('learning_rate',
-                                      [(0, 1e-3), (100, 1e-4)]),
+                                     # [(0, 1e-3), (100, 1e-4)]),
+                                      [(0, 2e-2)]),
             HumanHyperParamSetter('learning_rate'),
         ],
         model=Model(depth),
-        max_epoch=500,
+        max_epoch=1500,
     )
 
 
