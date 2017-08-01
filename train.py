@@ -25,6 +25,10 @@ class Model(ModelDesc):
 
     def _build_graph(self, inputs):
         image, label = inputs
+        
+        image = tf.identity(image, name="NETWORK_INPUT")
+        tf.summary.image('input-image', image, max_outputs=5)
+
         image = tf.cast(image, tf.float32) * (1.0 / 255)
 
         # Wrong mean/std are used for compatibility with pre-trained models.
@@ -122,11 +126,10 @@ class Model(ModelDesc):
 
 def get_data(train_or_test):
     isTrain = train_or_test == 'train'
+    
+    ds = Data(train_or_test, isTrain and cfg.affine)
 
-    if isTrain:
-        ds = Data(train_or_test)
-    else:
-        ds = Data(train_or_test)
+
 
     if isTrain:
         augmentors = [
@@ -165,16 +168,14 @@ def get_config(depth):
         dataflow=ds_train,
         callbacks=[
             ModelSaver(),
-            # InferenceRunner(dataset_val, [
-            #     ClassificationError('wrong-top1', 'val-error-top1'),
-            #     ClassificationError('wrong-top5', 'val-error-top5')]),
+            InferenceRunner(ds_test, [ScalarStats('loss')]),
             ScheduledHyperParamSetter('learning_rate',
-                                     # [(0, 1e-3), (100, 1e-4)]),
-                                      [(0, 2e-2)]),
+                                      [(0, 3e-2), (200, 2e-2), (500, 1e-3), (1000, 1e-4)]),
+                                      #[(0, 1e-2)]),
             HumanHyperParamSetter('learning_rate'),
         ],
         model=Model(depth),
-        max_epoch=1500,
+        max_epoch=2000,
     )
 
 

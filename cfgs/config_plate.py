@@ -15,5 +15,7 @@ cfg.anchor_bones = None
 
 cfg.weight_decay = 1e-4
 
+cfg.affine = True
+
 cfg.train_list = [cfg.name + "_train.txt"]
 cfg.test_list = cfg.name + "_test.txt"
